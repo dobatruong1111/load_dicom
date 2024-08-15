@@ -115,6 +115,7 @@ class LoadDicom:
 
             # -------------------------------------------------------------
             dict_file[self.filepath] = data_dict
+            print(f"dict_file: {dict_file}")
 
             # ---------- Verify is DICOMDir -------------------------------
             is_dicom_dir = 1
@@ -155,6 +156,7 @@ def yGetDicomGroups(directory, recursive=True, gui=True):
                 if gui:
                     yield (counter, nfiles)
                 LoadDicom(grouper, filepath)
+                break
     else:
         dirpath, dirnames, filenames = os.walk(directory)
         for name in filenames:
