@@ -1,7 +1,7 @@
 import gdcm
 
-import reader.utils as utils
-import reader.constants as const
+import utils as utils
+import constants as const
 
 ORIENT_MAP = {"SAGITTAL": 0, "CORONAL": 1, "AXIAL": 2, "OBLIQUE": 2}
 

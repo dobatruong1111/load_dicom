@@ -1,10 +1,96 @@
 import time, gdcm
 
-import reader.utils as utils
-import reader.constants as const
+import utils as utils
+import constants as const
 
 WL_PRESET = 0  # index of selected window and level tuple (if multiple)
 WL_MULT = 0  # allow selection of multiple window and level tuples if 1
+
+class Acquisition(object):
+    def __init__(self):
+        pass
+
+    def SetParser(self, parser):
+        self.patient_orientation = parser.GetImagePatientOrientation()
+        self.tilt = parser.GetAcquisitionGantryTilt()
+        self.id_study = parser.GetStudyID()
+        self.modality = parser.GetAcquisitionModality()
+        self.study_description = parser.GetStudyDescription()
+        self.acquisition_date = parser.GetAcquisitionDate()
+        self.institution = parser.GetInstitutionName()
+        self.date = parser.GetAcquisitionDate()
+        self.accession_number = parser.GetAccessionNumber()
+        self.series_description = parser.GetSeriesDescription()
+        self.time = parser.GetAcquisitionTime()
+        self.protocol_name = parser.GetProtocolName()
+        self.serie_number = parser.GetSerieNumber()
+        self.sop_class_uid = parser.GetSOPClassUID()
+        
+class Patient(object):
+    def __init__(self):
+        pass
+
+    def SetParser(self, parser):
+        self.name = parser.GetPatientName()
+        self.id = parser.GetPatientID()
+        self.age = parser.GetPatientAge()
+        self.birthdate = parser.GetPatientBirthDate()
+        self.gender = parser.GetPatientGender()
+        self.physician = parser.GetPhysicianReferringName()
+
+class Image(object):
+    def __init__(self):
+        pass
+
+    def SetParser(self, parser):
+        self.level = parser.GetImageWindowLevel()
+        self.window = parser.GetImageWindowWidth()
+
+        self.position = parser.GetImagePosition()
+        if not (self.position):
+            self.position = [1, 1, 1]
+
+        self.number = parser.GetImageNumber()
+        self.spacing = list(parser.GetPixelSpacing())
+        self.orientation_label = parser.GetImageOrientationLabel()
+        self.file = parser.filename
+        self.time = parser.GetImageTime()
+        self.type = parser.GetImageType()
+        self.size = (parser.GetDimensionX(), parser.GetDimensionY())
+        # self.imagedata = parser.GetImageData()
+        self.bits_allocad = parser._GetBitsAllocated()
+
+        self.number_of_frames = parser.GetNumberOfFrames()
+        self.samples_per_pixel = parser.GetImageSamplesPerPixel()
+
+        if parser.GetImageThickness():
+            self.spacing.append(parser.GetImageThickness())
+        else:
+            self.spacing.append(1.0)
+
+class Dicom(object):
+    def __init__(self):
+        pass
+
+    def SetParser(self, parser):
+        self.parser = parser
+
+        self.LoadImageInfo()
+        self.LoadPatientInfo()
+        self.LoadAcquisitionInfo()
+        # self.LoadStudyInfo()
+
+    def LoadImageInfo(self):
+        self.image = Image()
+        self.image.SetParser(self.parser)
+
+    def LoadPatientInfo(self):
+        self.patient = Patient()
+        self.patient.SetParser(self.parser)
+
+    def LoadAcquisitionInfo(self):
+        self.acquisition = Acquisition()
+        self.acquisition.SetParser(self.parser)
 
 class Parser:
     """
@@ -724,6 +810,22 @@ class Parser:
         if data:
             return data
         return ""
+    
+    def GetAccessionNumber(self):
+        """
+        Return integer related to acession number
+
+        DICOM standard tag (0x0008, 0x0050) was used.
+        """
+        # data = self.data_image[0x008][0x050]
+        return ""
+        if data:
+            try:
+                value = int(str(data))
+            except ValueError:  # Problem in the other\iCatDanielaProjeto
+                value = 0
+            return value
+        return ""
 
     def GetImagePatientOrientation(self):
         """
@@ -1224,6 +1326,32 @@ class Parser:
         if data:
             return float(data)
         return 0
+    
+    def GetSeriesDescription(self):
+        """
+        Return a string with a description of the series.
+        DICOM standard tag (0x0008, 0x103E) was used.
+        """
+        try:
+            data = self.data_image[str(0x0008)][str(0x103E)]
+        except KeyError:
+            # return _("unnamed")
+            return ""
+
+        encoding = self.GetEncoding()
+        try:
+            data = data.encode(encoding, errors="surrogateescape").decode(encoding)
+        except Exception as err:
+            print(err)
+
+        if data == "None":
+            # return _("unnamed")
+            return ""
+        if data:
+            return data
+        else:
+            # return _("unnamed")
+            return ""
 
     def GetImageConvolutionKernel(self):
         """
