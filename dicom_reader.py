@@ -154,22 +154,26 @@ def yGetDicomGroups(directory, recursive=True, gui=True):
                 filepath = os.path.join(dirpath, name)
                 counter += 1
                 if gui:
-                    yield (counter, nfiles)
+                    # yield (counter, nfiles)
+                    pass
                 LoadDicom(grouper, filepath)
-                break
     else:
         dirpath, dirnames, filenames = os.walk(directory)
         for name in filenames:
             filepath = str(os.path.join(dirpath, name))
             counter += 1
             if gui:
-                yield (counter, nfiles)
-    yield grouper.GetPatientsGroups()
+                # yield (counter, nfiles)
+                pass
+    # yield grouper.GetPatientsGroups()
+    return grouper.GetPatientsGroups()
 
 def GetDicomGroups(directory, recursive=True):
     return next(yGetDicomGroups(directory, recursive, gui=False))
 
 if __name__ == "__main__":
     directory = "/home/itadmin/truong/dicom/79f8a530-24ddc3f3-c163e5d0-96faead7-25bd5f3a/2408059658 LE VAN CAT 1974M/604662 CHUP CONG HUONG TU NAO MACH NAO XOANG/MR Ax DWI B1000"
-    for i in yGetDicomGroups(directory):
-        print(i)
+    
+    patientsGroups = yGetDicomGroups(directory)
+    print(type(patientsGroups))
+    
