@@ -22,6 +22,7 @@ class LoadDicom:
             reader.SetFileName(utils.encode(self.filepath, const.FS_ENCODE))
         except TypeError:
             reader.SetFileName(self.filepath)
+            
         if reader.Read():
             file = reader.GetFile()
             # Retrieve data set
@@ -115,7 +116,7 @@ class LoadDicom:
 
             # -------------------------------------------------------------
             dict_file[self.filepath] = data_dict
-            print(f"dict_file: {dict_file}")
+            # print(f"dict_file: {dict_file}")
 
             # ---------- Verify is DICOMDir -------------------------------
             is_dicom_dir = 1
@@ -170,10 +171,4 @@ def yGetDicomGroups(directory, recursive=True, gui=True):
 
 def GetDicomGroups(directory, recursive=True):
     return next(yGetDicomGroups(directory, recursive, gui=False))
-
-if __name__ == "__main__":
-    directory = "/home/itadmin/truong/dicom/79f8a530-24ddc3f3-c163e5d0-96faead7-25bd5f3a/2408059658 LE VAN CAT 1974M/604662 CHUP CONG HUONG TU NAO MACH NAO XOANG/MR Ax DWI B1000"
-    
-    patientsGroups = yGetDicomGroups(directory)
-    print(type(patientsGroups))
     
